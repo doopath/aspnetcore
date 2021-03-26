@@ -6,12 +6,10 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
 using System.Reflection;
 using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Components.LegacyRouteMatching;
 using Microsoft.Extensions.Logging;
 
 namespace Microsoft.AspNetCore.Components.Routing
@@ -34,8 +32,6 @@ namespace Microsoft.AspNetCore.Components.Routing
         private CancellationTokenSource _onNavigateCts;
 
         private Task _previousOnNavigateTask = Task.CompletedTask;
-
-        private HashSet<Assembly>? _legacyRouteTableAssemblies;
 
         private RouteKey _currentRouteKey;
 
@@ -81,14 +77,8 @@ namespace Microsoft.AspNetCore.Components.Routing
         /// <summary>
         /// Gets or sets a flag to indicate whether route matching should prefer exact matches
         /// over wildcards.
+        /// <para>This property is obsolete and configuring it does nothing.</para>
         /// </summary>
-        /// <remarks>
-        /// <para>
-        /// Important: all applications should explicitly set this to true. The option to set it to false
-        /// (or leave unset, which defaults to false) is only provided for backward compatibility.
-        /// In .NET 6, this option will be removed and the router will always prefer exact matches.
-        /// </para>
-        /// </remarks>
         [Parameter] public bool PreferExactMatches { get; set; }
 
         private IRouteTable Routes { get; set; }
@@ -153,12 +143,6 @@ namespace Microsoft.AspNetCore.Components.Routing
 
         private void RefreshRouteTable()
         {
-            if (!PreferExactMatches)
-            {
-                RefreshRouteTableLegacy();
-                return;
-            }
-
             var routeKey = new RouteKey(AppAssembly, AdditionalAssemblies);
 
             if (!routeKey.Equals(_currentRouteKey))
@@ -166,17 +150,6 @@ namespace Microsoft.AspNetCore.Components.Routing
                 _currentRouteKey = routeKey;
                 Routes = RouteTableFactory.Create(routeKey);
             }
-        }
-
-        private void RefreshRouteTableLegacy()
-        {
-            var assemblies = AdditionalAssemblies == null ? new[] { AppAssembly } : AdditionalAssemblies.Prepend(AppAssembly);
-            var assembliesSet = new HashSet<Assembly>(assemblies);
-            Routes = LegacyRouteTableFactory.Create(assemblies);
-
-            _legacyRouteTableAssemblies ??= new();
-            _legacyRouteTableAssemblies.Clear();
-            _legacyRouteTableAssemblies.UnionWith(assembliesSet);
         }
 
         internal virtual void Refresh(bool isNavigationIntercepted)

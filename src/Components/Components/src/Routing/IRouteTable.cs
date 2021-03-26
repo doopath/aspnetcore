@@ -4,7 +4,7 @@
 namespace Microsoft.AspNetCore.Components.Routing
 {
     /// <summary>
-    /// Provides an abstraction over <see cref="RouteTable"/> and <see cref="LegacyRouteMatching.LegacyRouteTable"/>.
+    /// Provides an abstraction over <see cref="RouteTable"/>.
     /// This is only an internal implementation detail of <see cref="Router"/> and can be removed once
     /// the legacy route matching logic is removed.
     /// </summary>
